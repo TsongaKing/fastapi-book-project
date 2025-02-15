@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from api.db.schemas import Book, Genre
-from api.db.dependencies import get_db  # Changed import
+from api.db.dependencies import get_db
 from typing import OrderedDict
 
 router = APIRouter(prefix="/books", tags=["books"])
