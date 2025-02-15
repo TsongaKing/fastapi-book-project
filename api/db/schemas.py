@@ -1,4 +1,4 @@
-from typing import Optional, OrderedDict  # Add this at the top
+from typing import Optional, OrderedDict
 from enum import Enum
 from pydantic import BaseModel
 
@@ -21,8 +21,17 @@ class InMemoryDB:
     def __init__(self):
         self.books: OrderedDict[int, Book] = OrderedDict()
 
-    def get_book(self, book_id: int) -> Optional[Book]:  # Now valid
+    def get_books(self) -> OrderedDict[int, Book]:  # Added this method
+        return self.books
+
+    def get_book(self, book_id: int) -> Optional[Book]:
         return self.books.get(book_id)
+    
+    def add_book(self, book: Book) -> Book:  # Added this method
+        if book.id in self.books:
+            raise ValueError(f"Book ID {book.id} already exists")
+        self.books[book.id] = book
+        return book
     
     def update_book(self, book_id: int, data: Book) -> Book:
         if book_id not in self.books:
