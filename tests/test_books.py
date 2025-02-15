@@ -1,19 +1,27 @@
-from tests import client
+from fastapi.testclient import TestClient
+from api.db.schemas import Book
+from main import app
 
+client = TestClient(app)
 
 def test_get_all_books():
-    response = client.get("/books/")
+    response = client.get("/api/v1/books")
     assert response.status_code == 200
-    assert len(response.json()) == 3
+    books = response.json()
+    assert len(books) == 3
+    [Book(**book) for book in books]  # Validate schema
 
-
-def test_get_single_book():
-    response = client.get("/books/1")
+def test_get_existing_book():
+    response = client.get("/api/v1/books/1")
     assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "The Hobbit"
-    assert data["author"] == "J.R.R. Tolkien"
+    book = Book(**response.json())
+    assert book.title == "The Hobbit"
+    assert book.author == "J.R.R. Tolkien"
 
+def test_get_nonexistent_book():
+    response = client.get("/api/v1/books/999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Book not found"}
 
 def test_create_book():
     new_book = {
@@ -21,32 +29,33 @@ def test_create_book():
         "title": "Harry Potter and the Sorcerer's Stone",
         "author": "J.K. Rowling",
         "publication_year": 1997,
-        "genre": "Fantasy",
+        "genre": "Fantasy"
     }
-    response = client.post("/books/", json=new_book)
+    response = client.post("/api/v1/books", json=new_book)
     assert response.status_code == 201
-    data = response.json()
-    assert data["id"] == 4
-    assert data["title"] == "Harry Potter and the Sorcerer's Stone"
-
+    created_book = Book(**response.json())
+    assert created_book.id == 4
+    
+    # Verify new book exists
+    response = client.get("/api/v1/books")
+    assert len(response.json()) == 4
 
 def test_update_book():
-    updated_book = {
+    updated_data = {
         "id": 1,
-        "title": "The Hobbit: An Unexpected Journey",
+        "title": "The Hobbit: Revised Edition",
         "author": "J.R.R. Tolkien",
         "publication_year": 1937,
-        "genre": "Fantasy",
+        "genre": "Fantasy"
     }
-    response = client.put("/books/1", json=updated_book)
+    response = client.put("/api/v1/books/1", json=updated_data)
     assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "The Hobbit: An Unexpected Journey"
+    updated_book = Book(**response.json())
+    assert updated_book.title == "The Hobbit: Revised Edition"
 
-
-def test_delete_book():
-    response = client.delete("/books/3")
-    assert response.status_code == 204
-
-    response = client.get("/books/3")
-    assert response.status_code == 404
+def test_delete_book_forbidden():
+    response = client.delete("/api/v1/books/3")
+    assert response.status_code == 403
+    assert "not allowed" in response.json()["detail"]
+    # Verify book still exists
+    assert client.get("/api/v1/books/3").status_code == 200
