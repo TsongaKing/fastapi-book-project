@@ -1,9 +1,14 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from api.db.schemas import Book, Genre
+from api.db.dependencies import get_db  # Changed import
 from typing import OrderedDict
-from fastapi import APIRouter, status, HTTPException, Depends
-from fastapi.responses import JSONResponse
-from api.db.schemas import Book, Genre, InMemoryDB, get_db
 
-router = APIRouter(tags=["books"], prefix="/books")
+router = APIRouter(prefix="/books", tags=["books"])
+
+@router.get("", response_model=OrderedDict[int, Book])
+async def get_books(db: InMemoryDB = Depends(get_db)):
+    return db.get_books()
+
 
 # --------------------------
 # Dependency Injection Setup

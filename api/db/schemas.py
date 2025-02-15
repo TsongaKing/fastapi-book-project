@@ -1,9 +1,8 @@
-from enum import Enum
-from typing import Optional, OrderedDict
 from pydantic import BaseModel
+from typing import OrderedDict
+from enum import Enum
 
 class Genre(str, Enum):
-    """Enumeration of valid book genres."""
     SCI_FI = "Science Fiction"
     FANTASY = "Fantasy"
     HORROR = "Horror"
@@ -12,7 +11,6 @@ class Genre(str, Enum):
     THRILLER = "Thriller"
 
 class Book(BaseModel):
-    """Pydantic model representing a book."""
     id: int
     title: str
     author: str
@@ -20,10 +18,9 @@ class Book(BaseModel):
     genre: Genre
 
 class InMemoryDB:
-    """In-memory database implementation using OrderedDict."""
-    
     def __init__(self):
         self.books: OrderedDict[int, Book] = OrderedDict()
+
 
     def get_books(self) -> OrderedDict[int, Book]:
         """Retrieve all books in insertion order."""
