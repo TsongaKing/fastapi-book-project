@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import OrderedDict
+from typing import Optional, OrderedDict
 from pydantic import BaseModel
 
 class Genre(str, Enum):
-    """Book genres."""
-
+    """Enumeration of valid book genres."""
     SCI_FI = "Science Fiction"
     FANTASY = "Fantasy"
     HORROR = "Horror"
@@ -13,11 +12,7 @@ class Genre(str, Enum):
     THRILLER = "Thriller"
 
 class Book(BaseModel):
-    """Book schema
-
-    Args:
-        BaseModel (BaseModel): Pydantic base model.
-    """
+    """Pydantic model representing a book."""
     id: int
     title: str
     author: str
@@ -25,58 +20,31 @@ class Book(BaseModel):
     genre: Genre
 
 class InMemoryDB:
+    """In-memory database implementation using OrderedDict."""
+    
     def __init__(self):
-        self.books: OrderedDict[int, Book] = {}
+        self.books: OrderedDict[int, Book] = OrderedDict()
 
     def get_books(self) -> OrderedDict[int, Book]:
-        """Gets books from database.
-
-        Returns:
-            OrderedDict[int, Book]: Ordered dictionary of books.
-        """
+        """Retrieve all books in insertion order."""
         return self.books
-    
+
     def add_book(self, book: Book) -> Book:
-        """Adds book to database.
+        """Add a new book to the database."""
+        self.books[book.id] = book  # Direct key assignment
+        return book
 
-        Args:
-            book (Book): Book to add.
-
-        Returns:
-            Book: Added book.
-        """
-        self.books.update({book.id: book})
-
-    def get_book(self, book_id: int) -> Book:
-        """Gets a specific book from database.
-
-        Args:
-            book_id (int): Book ID.
-
-        Returns:
-            Book: Book.
-        """
+    def get_book(self, book_id: int) -> Optional[Book]:
+        """Retrieve a book by ID, returns None if not found."""
         return self.books.get(book_id)
-    
+
     def update_book(self, book_id: int, data: Book) -> Book:
-        """Updates a specific book in database.
+        """Update existing book with validation."""
+        if book_id not in self.books:
+            raise ValueError(f"Book ID {book_id} not found")
+        self.books[book_id] = data
+        return data
 
-        Args:
-            book_id (int): Book ID.
-            data (Book): Book data.
-
-        Returns:
-            Book: Updated book.
-        """
-        self.books.update({book_id: data})
-        return self.books.get(book_id)
-
-    def delete_book(self, book_id: int) -> None: 
-        """Deletes a specific book from database.
-
-        Args:
-            book_id (int): Book ID.
-        """
-        if book_id in self.books:
-            del self.books[book_id]
-            
+    def delete_book(self, book_id: int) -> None:
+        """Disabled deletion method (per project requirements)."""
+        raise RuntimeError("Book deletion is not allowed")

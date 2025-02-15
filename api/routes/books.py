@@ -1,12 +1,10 @@
 
 from typing import OrderedDict
-
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import JSONResponse
-
 from api.db.schemas import Book, Genre, InMemoryDB
 
-router = APIRouter()
+router = APIRouter(tags=["books"], prefix="/api/v1")
 
 db = InMemoryDB()
 db.books = {
@@ -33,32 +31,53 @@ db.books = {
     ),
 }
 
+# --------------------------
+# MISSING ENDPOINT ADDED
+# --------------------------
+@router.get("/books/{book_id}", response_model=Book, status_code=status.HTTP_200_OK)
+async def get_book_by_id(book_id: int):
+    """Get a single book by ID with proper 404 handling"""
+    book = db.get_book(book_id)
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Book not found"
+        )
+    return book
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+# --------------------------
+# EXISTING ENDPOINTS IMPROVED
+# --------------------------
+@router.post("/books", status_code=status.HTTP_201_CREATED, response_model=Book)
 async def create_book(book: Book):
+    """Create a new book entry"""
     db.add_book(book)
-    return JSONResponse(
-        status_code=status.HTTP_201_CREATED, content=book.model_dump()
-    )
+    return book
 
-
-@router.get(
-    "/", response_model=OrderedDict[int, Book], status_code=status.HTTP_200_OK
-)
-async def get_books() -> OrderedDict[int, Book]:
+@router.get("/books", response_model=OrderedDict[int, Book])
+async def get_books():
+    """Get all books in the database"""
     return db.get_books()
 
+@router.put("/books/{book_id}", response_model=Book)
+async def update_book(book_id: int, book: Book):
+    """Update an existing book with error handling"""
+    existing_book = db.get_book(book_id)
+    if not existing_book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Book not found"
+        )
+    return db.update_book(book_id, book)
 
-@router.put("/{book_id}", response_model=Book, status_code=status.HTTP_200_OK)
-async def update_book(book_id: int, book: Book) -> Book:
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=db.update_book(book_id, book).model_dump(),
+# --------------------------
+# DISABLED DELETE FUNCTIONALITY
+# --------------------------
+@router.delete("/books/{book_id}", status_code=status.HTTP_403_FORBIDDEN)
+async def delete_book(book_id: int):
+    """Delete endpoint disabled per project requirements"""
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Deleting books is not allowed"
     )
-
-
-@router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_book(book_id: int) -> None:
-    db.delete_book(book_id)
-    return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content=None)
 
