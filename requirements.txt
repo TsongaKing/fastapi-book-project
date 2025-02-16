@@ -4,16 +4,16 @@ fastapi==0.115.8
 uvicorn==0.34.0
 starlette==0.45.3
 
-# Pydantic (compatible with FastAPI 0.115)
+# Pydantic
 pydantic==2.10.6
 pydantic-settings==2.7.1
+
+# Form Handling
+python-multipart==0.0.9
 
 # Testing
 pytest==8.3.4
 httpx==0.28.1
 
-# Required for form handling
-python-multipart==0.0.9
-
-# Security (optional)
+# Environment
 python-dotenv==1.0.1
