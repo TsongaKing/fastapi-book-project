@@ -22,12 +22,17 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -euo pipefail
+            set -euxo pipefail
             cd /var/www/fastapi-book-project
-            git fetch origin main
+            
+            # Clean update
+            git fetch --all
             git reset --hard origin/main
+            
+            # Build and deploy
             docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --build
-            docker image prune -af
-            docker system prune -af
+            docker compose -f docker-compose.prod.yml build --no-cache
+            docker compose -f docker-compose.prod.yml up -d
+            
+            # Cleanup
+            docker image prune -af --filter "until=24h"

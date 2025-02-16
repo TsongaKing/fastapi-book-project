@@ -1,9 +1,13 @@
+upstream fastapi {
+    server app:8000;
+}
+
 server {
     listen 80;
     server_name your-domain.com;
 
     location / {
-        proxy_pass http://fastapi-app:8000;
+        proxy_pass http://fastapi;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
