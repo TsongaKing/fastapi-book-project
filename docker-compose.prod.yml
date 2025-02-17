@@ -8,23 +8,41 @@ services:
     restart: unless-stopped
     environment:
       - ENVIRONMENT=production
+      - PYTHONUNBUFFERED=1  # Better logging
     volumes:
-      - ./data:/app/data  # Persistent storage for SQLite DB
+      - ./data:/app/data
+      - logs:/app/logs  # Persistent logging
     networks:
       - app-network
+    security_opt:
+      - no-new-privileges:true  # Security hardening
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     image: nginx:alpine
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"  # Add if using HTTPS
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - app
+      - certs:/etc/letsencrypt  # SSL certificates
     networks:
       - app-network
+    depends_on:
+      app:
+        condition: service_healthy  # Wait for app healthcheck
+
+volumes:
+  data:
+  logs:
+  certs:
 
 networks:
   app-network:
     driver: bridge
+    internal: true  # Prevent external access
