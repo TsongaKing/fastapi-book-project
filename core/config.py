@@ -1,4 +1,4 @@
-from pydantic import Field, PostgresDsn
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Optional
 
@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     # Required Core Settings
     PROJECT_NAME: str = "FastAPI Book Service"
     PROJECT_VERSION: str = "1.0.0"
-    SECRET_KEY: str = Field(
+    SECRET_KEY: str = Field(  # Remove default to enforce env provision
         min_length=32,
         description="Secret key for cryptographic operations"
     )
@@ -15,12 +15,8 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     ENVIRONMENT: str = "production"
 
-    # API Configuration
-    API_PREFIX: str = "/api/v1"
-    API_DOCS_URL: Optional[str] = "/docs"
-
-    # Database Configuration
-    DATABASE_URL: PostgresDsn = "sqlite:///./books.db"
+    # Database Configuration (SQLite compatible)
+    DATABASE_URL: str = "sqlite:///./books.db"  # Changed from PostgresDsn
 
     # CORS Configuration
     CORS_ORIGINS: List[str] = []
