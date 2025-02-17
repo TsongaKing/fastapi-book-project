@@ -4,7 +4,7 @@ upstream fastapi {
 
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name localhost;
 
     location / {
         proxy_pass http://fastapi;
