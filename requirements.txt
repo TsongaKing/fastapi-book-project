@@ -6,7 +6,7 @@ starlette==0.45.3
 
 # Database
 sqlalchemy==2.0.29
-databases[SQLite]==0.8.0
+databases[SQLite]==0.9.0  # Critical fix
 
 # Pydantic
 pydantic==2.10.6
