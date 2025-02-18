@@ -7,6 +7,7 @@ services:
     environment:
       - ENVIRONMENT=production
       - PYTHONUNBUFFERED=1
+      - SECRET_KEY=0Jq0SPT9WiawVtCybYcaAy_1OV8kBFk-N942salNAi4
     volumes:
       - ./data:/app/data
       - logs:/app/logs
@@ -20,12 +21,12 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/healthcheck"]  # Fixed endpoint
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
     expose:
-      - "8000"  # Required for nginx communication
+      - "8000"  # Allows communication with nginx over the internal network
 
   nginx:
     image: nginx:alpine
