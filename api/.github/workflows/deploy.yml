@@ -6,7 +6,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # environment: production  # Only enable after creating in repo settings
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,18 +27,21 @@ jobs:
             set -euxo pipefail
             cd /var/www/fastapi-book-project
             
-            # Atomic deployment
+            # 1. Pull latest code
             git fetch --all
             git reset --hard origin/main
             
-            # Build with cache cleanup
-            docker compose -f docker-compose.prod.yml build --no-cache
+            # 2. Copy production env file
+            cp .env.production .env
             
-            # Zero-downtime update
+            # 3. Build and deploy
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml build --no-cache
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             
-            # System cleanup
-            docker system prune -af --filter "until=24h"
+            # 4. Cleanup
+            docker image prune -af --filter "until=24h"
+            docker builder prune -af
             
-            # Health verification
-            curl --retry 3 --retry-delay 5 --fail http://localhost/healthcheck
+            # 5. Verify deployment
+            curl --retry 3 --retry-delay 5 --max-time 10 --fail http://localhost/api/v1/books/1
