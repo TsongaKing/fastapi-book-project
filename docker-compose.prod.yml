@@ -7,7 +7,7 @@ services:
     environment:
       - ENVIRONMENT=production
       - PYTHONUNBUFFERED=1
-      - SECRET_KEY=0Jq0SPT9WiawVtCybYcaAy_1OV8kBFk-N942salNAi4
+      - SECRET_KEY=0Jq0SPT9WiawVtCybYcaAy_1OV8kBFk-N942salNAi4  # Added secret key
     volumes:
       - ./data:/app/data
       - logs:/app/logs
@@ -26,7 +26,7 @@ services:
       timeout: 10s
       retries: 3
     expose:
-      - "8000"  # Allows communication with nginx over the internal network
+      - "8000"
 
   nginx:
     image: nginx:alpine
