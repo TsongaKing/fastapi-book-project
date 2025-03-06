@@ -7,7 +7,7 @@ services:
     environment:
       - ENVIRONMENT=production
       - PYTHONUNBUFFERED=1
-      - SECRET_KEY=0Jq0SPT9WiawVtCybYcaAy_1OV8kBFk-N942salNAi4  # Added secret key
+      - SECRET_KEY=  # Added secret key
     volumes:
       - ./data:/app/data
       - logs:/app/logs
